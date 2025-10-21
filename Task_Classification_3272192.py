@@ -28,11 +28,11 @@ def random_forest_experiment(n_estimators, min_samples_leaf, X, y):
     - Mean cross-validation accuracy (measure to estimate the accuracy of our prediction
       based on a 10-fold cross validation)
     """
-    # TODO: Create a RandomForestClassifier model with given parameters
-    # n_estimators and min_sample_leaf as input, set random_state to 2024
-    
-    # TODO: Implement 10-fold cross-validation with random_state set to 2024
-    # and compute the scores based on cross-validation accuracy
+
+    classifier = RandomForestClassifier(n_estimators=n_estimators, random_state=2024, min_samples_leaf=min_samples_leaf)
+
+    kfolds = KFold(n_splits=10, random_state=2024, shuffle=True)
+    scores = cross_val_score(classifier, X, y, scoring='accuracy', cv=kfolds)
 
     # Return the average cross-validation accuracy
     return scores.mean()
@@ -52,18 +52,24 @@ def get_best_hyperparameters(n_estimators_list, min_samples_leaf_list, X, y):
     - Best hyperparameter combination and corresponding accuracy.
     """
     results = []
+    best_result = {}
 
-    # TODO: Iterate over all combinations of hyperparameters and calculate the 
-    # cross-validation accuracy by using random_forest_experiment function, append 
-    # n_estimators, min_sample_leaf and accuracy to results.
-    
+    y= y.squeeze(1) # Makes sure that y is 1D
+    for n in n_estimators_list:
+        for m in min_samples_leaf_list:
+            score = random_forest_experiment(n_estimators=n, min_samples_leaf=m, X=X, y=y)
+            results.append({'n_estimators': n,'min_samples_leaf': m,'accuracy': score})
+            print("We zijn nu bij n=",n, "en m=",m )
+
+    best_result = max(results, key=lambda x: x['accuracy'])
+        
     # Return the best combination of hyperparameters and the corresponding accuracy
     return best_result
 
-    # TO DO: After running the above function, manually input your best result here
+ 
 def manually_entered_best_params_and_accuracy():
-    best_params = {'n_estimators': 500, 'min_samples_leaf': 500}  # Example, to be replaced with the retrieved best parameters
-    best_accuracy = 0.9999  # Example accuracy, to be replaced with your achieved accuracy
+    best_params = {'n_estimators': 1000, 'min_samples_leaf': 1}
+    best_accuracy = 0.7096
     return best_params, best_accuracy
     
 # Main function
