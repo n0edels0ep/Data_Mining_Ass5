@@ -72,7 +72,6 @@ def get_best_hyperparameters(n_estimators_list, min_samples_leaf_list, X, y):
         for m in min_samples_leaf_list:
             score = random_forest_regression_experiment(n_estimators=n, min_samples_leaf=m, X=X, y=y)
             results.append({'n_estimators': n,'min_samples_leaf': m,'mse': score})
-            print("We zijn nu bij n=",n, "en m=",m )
 
     best_result = max(results, key=lambda x: x['mse'])
 
