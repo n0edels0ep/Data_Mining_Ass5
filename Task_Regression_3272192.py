@@ -15,17 +15,24 @@ def load_and_preprocess_data():
     data_url = "https://archive.ics.uci.edu/ml/machine-learning-databases/00275/Bike-Sharing-Dataset.zip"
 
     # TODO: Extract the 'day.csv' file from the zip archive and load it into the data DataFrame.
-    df = pd.read_csv(data_url.open('day.csv'))
+    response = requests.get(data_url)
+    with zipfile.ZipFile(io.BytesIO(response.content)) as z:
+        with z.open('day.csv') as f:
+            df = pd.read_csv(f)
 
     # TODO: Convert the 'dteday' column from a string to a datetime format and extract 
     # and create a 'day_of_month' column from it, 
     # which contains only the "day" information for each date
-    
+    df['dteday'] =  pd.to_datetime(df['dteday'])
+    df['day_of_month'] = df['dteday'].dt.day
 
     # TODO: Remove the original date column and other irrelevant columns ('dteday', 'casual', 'registered', 'cnt').
     # 'dteday' column contains date information and has been specially handled above.
     # 'casual' and 'registered' column would introduce a bias and lead to overfitting
     # 'cnt' column already contains the target information
+    y = df['cnt']
+    df = df.drop(['dteday', 'casual', 'registered', 'cnt'], axis=1)
+    X = df
 
     return X, y
 
@@ -80,21 +87,21 @@ def get_best_hyperparameters(n_estimators_list, min_samples_leaf_list, X, y):
     #y= y.squeeze(1) # Makes sure that y is 1D
     for n in n_estimators_list:
         for m in min_samples_leaf_list:
-            score = RandomForestRegressor(n_estimators=n, min_samples_leaf=m, X=X, y=y)
+            score = random_forest_regression_experiment(n_estimators=n, min_samples_leaf=m, X=X, y=y)
             results.append({'n_estimators': n,'min_samples_leaf': m,'mse': score})
             print("We zijn nu bij n=",n, "en m=",m )
 
-    best_result = min(results, key=lambda x: x['mse'])
+    best_result = max(results, key=lambda x: x['mse'])
     # TODO: Select the result with the smallest negative mean squared error (closest to zero)
     # from the results list as the best result.
 
     # Return the best combination of hyperparameters and their corresponding smallest negative mean squared error
     return best_result # best_result is a dictionary
 
-    # TO DO: After running the above function, manually input your best result here
+
 def manually_entered_best_params_and_mse():
-    best_params = {'n_estimators': 100, 'min_samples_leaf': 100}  # Example, to be replaced with the retrieved best parameters
-    best_mse = -99999.9999  # Example mse, to be replaced with your achieved mse
+    best_params = {'n_estimators': 1000, 'min_samples_leaf': 1}
+    best_mse = -418641.1448
     return best_params, best_mse
 
 if __name__ == "__main__":
